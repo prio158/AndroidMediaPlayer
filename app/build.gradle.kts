@@ -50,7 +50,12 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.livedata)
+    implementation(libs.viewmodel)
+    implementation(libs.fragmentktx)
+    implementation(libs.stdlib)
+    implementation(libs.coroutines)
+    implementation(libs.coroutinessupport)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

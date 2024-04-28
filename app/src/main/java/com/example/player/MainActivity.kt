@@ -3,6 +3,7 @@ package com.example.player
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.SurfaceHolder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -10,7 +11,7 @@ import com.example.player.databinding.ActivityMainBinding
 import com.example.player.ext.doOnLifecycle
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var player: Player
@@ -19,40 +20,44 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
 
         requestMyPermissions()
 
+        binding.surfaceView.holder.addCallback(this)
+
         player = Player(this)
 
-        player.initResId(R.raw.demo)
-
-        // Example of a call to a native method
         binding.button.setOnClickListener {
-            if (player.isPlaying()) {
-                player.pause()
-                binding.button.text = "Play"
-            } else {
+            if (player.isStop) {
+                player.prepare()
+            }
+            if (!player.isPlaying()) {
                 player.start()
-                binding.button.text = "Pause"
             }
         }
 
+        binding.buttonPause.setOnClickListener {
+            if (player.isPlaying())
+                player.pause()
+        }
+
+        binding.buttonStop.setOnClickListener {
+            player.stop()
+        }
+
         lifecycle.doOnLifecycle(onDestroy = {
+            if (player.isPlaying())
+                player.stop()
             player.release()
+
         })
     }
-
-    /**
-     * A native method that is implemented by the 'player' native library,
-     * which is packaged with this application.
-     */
-    external fun stringFromJNI(): String
 
     companion object {
         const val TAG = "Player"
 
-        // Used to load the 'player' library on application startup.
         init {
             System.loadLibrary("player")
         }
@@ -90,5 +95,14 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "requestMyPermissions: 有读SD权限")
         }
     }
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        player.initPlayer(R.raw.demo)
+        player.setMediaParam(holder)
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {}
 
 }

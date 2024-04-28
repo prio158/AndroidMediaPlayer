@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">Player</string>
     <string name="play">Play</string>
-    <string name="video_url">/storage/emulated/0/Movies/demo.mp4</string>
 </resources>

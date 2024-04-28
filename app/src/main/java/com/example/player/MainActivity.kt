@@ -1,13 +1,14 @@
 package com.example.player
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.player.databinding.ActivityMainBinding
+import com.example.player.ext.doOnLifecycle
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var player: Player
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,8 +16,24 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        player = Player(this)
+
+        player.initResId(R.string.video_url)
+
         // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
+        binding.button.setOnClickListener {
+            if (player.isPlaying()) {
+                player.pause()
+                binding.button.text = "Play"
+            } else {
+                player.start()
+                binding.button.text = "Pause"
+            }
+        }
+
+        lifecycle.doOnLifecycle(onDestroy = {
+            player.release()
+        })
     }
 
     /**
